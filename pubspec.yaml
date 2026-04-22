@@ -1,0 +1,27 @@
+name: saba3_app
+description: تطبيق صباعي - 6 اقسام مع Supabase
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  supabase_flutter: ^2.5.6
+  go_router: ^14.2.7
+  provider: ^6.1.2
+  flutter_svg: ^2.0.10+1
+  timeago: ^3.6.1
+  uuid: ^4.4.2
+  cupertino_icons: ^1.0.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.2
+
+flutter:
+  uses-material-design: true
