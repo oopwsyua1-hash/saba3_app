@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:go_router/go_router.dart';
+import 'pages/auth_page.dart'; // ← استدعاء الصفحة الجديدة
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,15 +37,13 @@ class Saba3App extends StatelessWidget {
   }
 }
 
-// الراوتر المبدئي - رح نكملو بعد ما نعمل الصفحات
+// الراوتر بعد التعديل
 final _router = GoRouter(
   initialLocation: '/auth',
   routes: [
     GoRoute(
       path: '/auth',
-      builder: (context, state) => const Scaffold(
-        body: Center(child: Text('صفحة تسجيل الدخول - جاي بالطريق')),
-      ),
+      builder: (context, state) => const AuthPage(), // ← صار يفتح صفحة تسجيل الدخول الحقيقية
     ),
   ],
 );
