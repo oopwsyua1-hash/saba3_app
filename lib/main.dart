@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'pages/auth_page.dart';
-import 'pages/home_page.dart'; // ← استدعاء صفحة الـ 6 ازرار
+import 'pages/home_page.dart';
+import 'pages/profile_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,16 +39,13 @@ class Saba3App extends StatelessWidget {
   }
 }
 
-// الراوتر الجديد مع تحويل تلقائي
 final _router = GoRouter(
   initialLocation: '/auth',
   redirect: (context, state) {
     final session = supabase.auth.currentSession;
     final isLoggingIn = state.matchedLocation == '/auth';
 
-    // اذا مو مسجل دخول رجعو عالـ auth
     if (session == null && !isLoggingIn) return '/auth';
-    // اذا مسجل دخول وفايق عالـ auth وديه عالـ home
     if (session != null && isLoggingIn) return '/home';
     
     return null;
@@ -59,7 +57,11 @@ final _router = GoRouter(
     ),
     GoRoute(
       path: '/home',
-      builder: (context, state) => const HomePage(), // ← صفحة الـ 6 اقسام
+      builder: (context, state) => const HomePage(),
+    ),
+    GoRoute(
+      path: '/profile',
+      builder: (context, state) => const ProfilePage(),
     ),
   ],
 );
