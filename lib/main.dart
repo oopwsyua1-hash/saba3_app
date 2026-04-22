@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'pages/auth_page.dart';
 import 'pages/home_page.dart';
 import 'pages/profile_page.dart';
+import 'pages/chat_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -62,6 +63,10 @@ final _router = GoRouter(
     GoRoute(
       path: '/profile',
       builder: (context, state) => const ProfilePage(),
+    ),
+    GoRoute(
+      path: '/chat',
+      builder: (context, state) => const ChatPage(),
     ),
   ],
 );
