@@ -14,6 +14,7 @@ class _ChatPageState extends State<ChatPage> {
   final _messageController = TextEditingController();
   final _scrollController = ScrollController();
   List<Map<String, dynamic>> _messages = [];
+  Map<String, String> _usernames = {}; // نخزن اسماء المستخدمين هون
   bool _isLoading = true;
 
   @override
@@ -27,14 +28,30 @@ class _ChatPageState extends State<ChatPage> {
   Future<void> _fetchMessages() async {
     setState(() => _isLoading = true);
     try {
-      final data = await supabase
-       .from('messages')
-       .select('*, profiles(username)')
-       .order('created_at', ascending: false)
-       .limit(50);
+      // 1. جيب الرسائل
+      final msgData = await supabase
+      .from('messages')
+      .select()
+      .order('created_at', ascending: false)
+      .limit(50);
+
+      final messages = List<Map<String, dynamic>>.from(msgData).reversed.toList();
+
+      // 2. جيب اسماء اصحاب الرسائل
+      final userIds = messages.map((m) => m['user_id'] as String).toSet().toList();
+      if (userIds.isNotEmpty) {
+        final profileData = await supabase
+        .from('profiles')
+        .select('id, username')
+        .inFilter('id', userIds);
+
+        for (var profile in profileData) {
+          _usernames[profile['id']] = profile['username']?? 'مجهول';
+        }
+      }
 
       setState(() {
-        _messages = List<Map<String, dynamic>>.from(data).reversed.toList();
+        _messages = messages;
         _isLoading = false;
       });
       _scrollToBottom();
@@ -45,23 +62,29 @@ class _ChatPageState extends State<ChatPage> {
 
   void _setupRealtime() {
     supabase
-     .channel('public:messages')
-     .onPostgresChanges(
+    .channel('public:messages')
+    .onPostgresChanges(
           event: PostgresChangeEvent.insert,
           schema: 'public',
           table: 'messages',
           callback: (payload) async {
-            final newMsg = await supabase
-             .from('messages')
-             .select('*, profiles(username)')
-             .eq('id', payload.newRecord['id'])
-             .single();
+            final newMsg = payload.newRecord;
+
+            // جيب اسم المرسل اذا مو مخزن عندنا
+            if (!_usernames.containsKey(newMsg['user_id'])) {
+              final profile = await supabase
+              .from('profiles')
+              .select('username')
+              .eq('id', newMsg['user_id'])
+              .single();
+              _usernames[newMsg['user_id']] = profile['username']?? 'مجهول';
+            }
 
             setState(() => _messages.add(newMsg));
             _scrollToBottom();
           },
         )
-     .subscribe();
+    .subscribe();
   }
 
   Future<void> _sendMessage() async {
@@ -108,7 +131,7 @@ class _ChatPageState extends State<ChatPage> {
         children: [
           Expanded(
             child: _isLoading
-             ? const Center(child: CircularProgressIndicator())
+            ? const Center(child: CircularProgressIndicator())
                 : ListView.builder(
                     controller: _scrollController,
                     padding: const EdgeInsets.all(12),
@@ -116,7 +139,7 @@ class _ChatPageState extends State<ChatPage> {
                     itemBuilder: (context, index) {
                       final msg = _messages[index];
                       final isMine = msg['user_id'] == currentUserId;
-                      final username = msg['profiles']?['username']?? 'مجهول';
+                      final username = _usernames[msg['user_id']]?? 'مجهول';
                       final time = timeago.format(DateTime.parse(msg['created_at']), locale: 'ar');
 
                       return Align(
