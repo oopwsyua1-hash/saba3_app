@@ -29,10 +29,12 @@ class _ProfilePageState extends State<ProfilePage> {
           .from('profiles')
           .select()
           .eq('id', userId)
-          .single();
+          .maybeSingle(); // ← عدلنا هاد بدل single
 
-      _usernameController.text = data['username'] ?? '';
-      _bioController.text = data['bio'] ?? '';
+      if (data != null) {
+        _usernameController.text = data['username'] ?? '';
+        _bioController.text = data['bio'] ?? '';
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -50,10 +52,12 @@ class _ProfilePageState extends State<ProfilePage> {
       final username = _usernameController.text.trim();
       final bio = _bioController.text.trim();
 
-      await supabase.from('profiles').update({
-        'username': username, // القيد 20 حرف موجود بالجدول
-        'bio': bio, // القيد 60 حرف موجود بالجدول
-      }).eq('id', userId);
+      // upsert = update اذا موجود او insert اذا مو موجود
+      await supabase.from('profiles').upsert({
+        'id': userId, // ← مهم نضيف الـ id هون
+        'username': username, // 20 حرف موجود بالجدول
+        'bio': bio, // 60 حرف موجود بالجدول
+      });
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -98,7 +102,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     labelText: 'اسم المستخدم',
                     border: OutlineInputBorder(),
                   ),
-                  maxLength: 20, // ← قيد الـ 20 حرف
+                  maxLength: 20,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -107,7 +111,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     labelText: 'السيرة الذاتية',
                     border: OutlineInputBorder(),
                   ),
-                  maxLength: 60, // ← قيد الـ 60 حرف اللي طلبتو
+                  maxLength: 60,
                   maxLines: 3,
                 ),
                 const SizedBox(height: 24),
