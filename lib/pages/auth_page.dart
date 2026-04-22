@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:go_router/go_router.dart'; // ← ضفتو مشان التنقل
 import '../main.dart';
 
 class AuthPage extends StatefulWidget {
@@ -24,9 +25,7 @@ class _AuthPageState extends State<AuthPage> {
         password: _passwordController.text.trim(),
       );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('تم تسجيل الدخول')),
-        );
+        context.go('/home'); // ← عدلناها: يروح عالصفحة الرئيسية
       }
     } on AuthException catch (e) {
       if (mounted) {
@@ -61,9 +60,7 @@ class _AuthPageState extends State<AuthPage> {
         });
         
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('تم انشاء الحساب بنجاح')),
-          );
+          context.go('/home'); // ← عدلناها: يروح عالصفحة الرئيسية
         }
       }
     } on AuthException catch (e) {
